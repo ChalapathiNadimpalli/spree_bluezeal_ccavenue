@@ -4,7 +4,7 @@ module Spree
     skip_before_filter :verify_authenticity_token, only: :callback # Request to callback comes from CCAvenue, so it does not contain authenticity token
 
     helper 'spree/orders'
-    ssl_allowed
+    # ssl_allowed
 
     # This action prepares necessary attributes required by CCAvenue
     def show
