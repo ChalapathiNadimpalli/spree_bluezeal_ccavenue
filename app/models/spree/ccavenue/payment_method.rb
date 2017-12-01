@@ -3,11 +3,15 @@ module Spree
     preference :merchant_id, :string
     preference :access_code, :string
     preference :encryption_key, :string
+    preference :test_mode, :boolean, default: true
 
     # Hardcoded, because usually merchants don't know what it should look like
     def url
-      'https://secure.ccavenue.com/transaction/transaction.do'
-      # 'https://test.ccavenue.com/transaction/transaction.do'
+      if preferred_test_mode
+        'https://test.ccavenue.com/transaction/transaction.do'
+      else
+        'https://secure.ccavenue.com/transaction/transaction.do'
+      end
     end
 
     # Refer to Spree Commerce documentation for details
