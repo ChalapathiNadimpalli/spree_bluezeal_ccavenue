@@ -60,7 +60,6 @@ module Spree
         if @transaction.authorized? # Successful
           session[:order_id] = nil
           flash.notice = I18n.t(:order_processed_successfully)
-          flash[:commerce_tracking] = 'nothing special'
           # We are setting token here so that even if the URL is copied and reused later on he completed order page still gets displayed
           if session[:access_token].nil?
             redirect_to order_path(@transaction.order, {:checkout_complete => true})
