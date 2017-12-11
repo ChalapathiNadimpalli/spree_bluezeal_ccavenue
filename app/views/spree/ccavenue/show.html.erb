@@ -7,9 +7,9 @@
       <div class="checkout_form">
         <%= form_tag @payment_method.url do %>
           <% if @mobile_request %>
-            <% redirect_url    = gateway_ccavenue_callback_url(@transaction, protocol: 'http', mobile: 'true') %>
+            <% redirect_url = gateway_ccavenue_callback_url(@transaction, protocol: 'http', mobile: 'true') %>
           <% else %>
-            <% redirect_url    = gateway_ccavenue_callback_url(@transaction, protocol: 'http') %>
+            <% redirect_url = gateway_ccavenue_callback_url(@transaction, protocol: 'http') %>
           <% end %>
           <%
             merchant_id     = @payment_method.preferred_merchant_id

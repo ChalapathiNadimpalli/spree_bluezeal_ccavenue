@@ -109,12 +109,11 @@ module Spree
 
     def mobile_request
       @mobile_request ||= params.has_key?(:mobile).present?
-      flash[:error] = @mobile_request.to_s
     end
 
     def sign_in_mobile_user
       return if params[:mobile].blank? || params[:api_key].blank?
-      user = User.where(spree_api_key: params[:api_key]).first
+      user = Spree.user_class.where(spree_api_key: params[:api_key]).first
       return unless user
       return if user.id == spree_current_user&.id
       sign_out spree_current_user if spree_current_user
