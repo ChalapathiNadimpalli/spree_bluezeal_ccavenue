@@ -2,6 +2,8 @@ module Spree
   class CcavenueController < StoreController
 
     skip_before_filter :verify_authenticity_token, only: :callback # Request to callback comes from CCAvenue, so it does not contain authenticity token
+    before_action :sign_in_mobile_user, only: :show
+    before_action :mobile_request, only: %i[show callback]
 
     helper 'spree/orders'
     # ssl_allowed
@@ -43,6 +45,10 @@ module Spree
       @transaction = Spree::Ccavenue::Transaction.find(params[:id])
       raise "Transaction with id: #{params[:id]} not found!" unless @transaction
 
+      if @mobile_request
+        @payment_method = Spree::PaymentMethod.find(@transaction.payment_method_id)
+      end
+
       params = decrypt_ccavenue_response_params # Need to decrypt params first
       logger.info "Decrypted params from CCAvenue #{params.inspect}"
       @transaction.auth_desc = params['order_status']
@@ -61,28 +67,59 @@ module Spree
           session[:order_id] = nil
           flash.notice = I18n.t(:order_processed_successfully)
           # We are setting token here so that even if the URL is copied and reused later on he completed order page still gets displayed
-          if session[:access_token].nil?
-            redirect_to order_path(@transaction.order, {:checkout_complete => true})
+          if @mobile_request
+            @error = ''
           else
-            redirect_to order_path(@transaction.order, {:checkout_complete => true, :token => session[:access_token]})
+            if session[:access_token].nil?
+              redirect_to order_path(@transaction.order, {:checkout_complete => true})
+            else
+              redirect_to order_path(@transaction.order, {:checkout_complete => true, :token => session[:access_token]})
+            end
           end
         elsif @transaction.rejected?
-          redirect_to edit_order_path(@transaction.order), :error => I18n.t("payment_rejected")
+          if @mobile_request
+            @error = I18n.t("payment_rejected")
+          else
+            redirect_to edit_order_path(@transaction.order), :error => I18n.t("payment_rejected")
+          end
         elsif @transaction.canceled?
-          redirect_to edit_order_path(@transaction.order), :notice => I18n.t("payment_canceled")
+          if @mobile_request
+            @error = I18n.t("payment_canceled")
+          else
+            redirect_to edit_order_path(@transaction.order), :notice => I18n.t("payment_canceled")
+          end
         elsif @transaction.initiated?
-          redirect_to edit_order_path(@transaction.order), :notice => I18n.t("payment_initiated")
+          if @mobile_request
+            @error = I18n.t("payment_initiated")
+          else
+            redirect_to edit_order_path(@transaction.order), :notice => I18n.t("payment_initiated")
+          end
         elsif @transaction.batch?
           # Don't allow the order to be reused.
           session[:order_id] = nil
           render 'batch'
         end
       else
+        flash[:error] = "Unable to process your request."
         render 'error'
       end
     end
 
     private
+
+    def mobile_request
+      @mobile_request ||= params.has_key?(:mobile).present?
+      flash[:error] = @mobile_request.to_s
+    end
+
+    def sign_in_mobile_user
+      return if params[:mobile].blank? || params[:api_key].blank?
+      user = User.where(spree_api_key: params[:api_key]).first
+      return unless user
+      return if user.id == spree_current_user&.id
+      sign_out spree_current_user if spree_current_user
+      sign_in user
+    end
 
     def decrypt_ccavenue_response_params
       logger.info "Received transaction from CCAvenue #{params.inspect}"

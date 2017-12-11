@@ -6,14 +6,17 @@
       <div class="clear"></div>
       <div class="checkout_form">
         <%= form_tag @payment_method.url do %>
-        <%
-          merchant_id     = @payment_method.preferred_merchant_id
-          access_code     = @payment_method.preferred_access_code
-          encryption_key  = @payment_method.preferred_encryption_key
-          redirect_url    = gateway_ccavenue_callback_url(@transaction, :protocol => 'http')
-          enc_request     = encrypted_request(@payment_method, @transaction, @order, redirect_url, encryption_key)
-        %>
-  
+          <% if @mobile_request %>
+            <% redirect_url    = gateway_ccavenue_callback_url(@transaction, protocol: 'http', mobile: 'true') %>
+          <% else %>
+            <% redirect_url    = gateway_ccavenue_callback_url(@transaction, protocol: 'http') %>
+          <% end %>
+          <%
+            merchant_id     = @payment_method.preferred_merchant_id
+            access_code     = @payment_method.preferred_access_code
+            encryption_key  = @payment_method.preferred_encryption_key
+            enc_request     = encrypted_request(@payment_method, @transaction, @order, redirect_url, encryption_key)
+          %>
           <%= hidden_field_tag 'command',                      'initiateTransaction' %>
           <%= hidden_field_tag 'merchant_id',                  merchant_id %>
           <%= hidden_field_tag 'access_code',                  access_code %>
@@ -28,3 +31,16 @@
   <div class="clear"></div>
 </div>
 
+<% if @mobile_request %>
+  <style>
+    body {
+      display: none;
+    }
+  </style>
+  <script>
+    $(function() {
+        $('.checkout_form form')[0].submit();
+    });
+
+  </script>
+<% end %>

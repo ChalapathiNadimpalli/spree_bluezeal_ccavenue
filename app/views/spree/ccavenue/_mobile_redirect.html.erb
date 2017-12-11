@@ -1,0 +1,12 @@
+<% if @mobile_request %>
+  <% redirect_url = "#{@payment_method.preferred_mobile_schema || 'mobileschema://'}?error=#{url_encode(error)}" %>
+
+  <style>
+    body {
+      display: none;
+    }
+  </style>
+  <script>
+    window.location.replace("<%= redirect_url %>");
+  </script>
+<% end %>

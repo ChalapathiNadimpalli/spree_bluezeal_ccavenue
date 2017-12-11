@@ -1,0 +1,2 @@
+<% error = flash[:error] || 'Unable to process your request.' %>
+<%= render :partial => 'mobile_redirect', locals: { error: error } %>

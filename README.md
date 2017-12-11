@@ -19,6 +19,16 @@ bundle
 bundle exec rails g spree_bluezeal_ccavenue:install
 ```
 
+
+Mobile
+------
+Use following url format to redirect to CCAvenue from mobile apps
+
+[base_url]/gateway/[:order_number]/ccavenue/[:paymnet_method_id]?mobile=true&api_key=[:user_api_key]
+
+Also set `mobile_schema` in CCAvenue setting. 
+
+
 Testing
 -------
 
