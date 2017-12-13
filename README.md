@@ -28,6 +28,8 @@ Use following url format to redirect to CCAvenue from mobile apps
 
 Also set `mobile_schema` in CCAvenue setting. 
 
+Get CCAvenue payment methods using `/api/v1/payment_methods/ccavenue` endpoint
+
 
 Testing
 -------
