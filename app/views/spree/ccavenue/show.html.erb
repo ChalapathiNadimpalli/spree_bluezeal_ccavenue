@@ -1,3 +1,4 @@
+<%- protocol = @payment_method.preferred_use_ssl ? 'https' : 'http' %>
 <div id="checkout" data-hook>
   <%= render partial: 'spree/shared/error_messages', locals: { target: @order } %>
   <h3><%= t(:checkout) %></h3>  
@@ -7,9 +8,9 @@
       <div class="checkout_form">
         <%= form_tag @payment_method.url do %>
           <% if @mobile_request %>
-            <% redirect_url = gateway_ccavenue_callback_url(@transaction, protocol: 'http', mobile: 'true') %>
+            <% redirect_url = gateway_ccavenue_callback_url(@transaction, protocol: protocol, mobile: 'true') %>
           <% else %>
-            <% redirect_url = gateway_ccavenue_callback_url(@transaction, protocol: 'http') %>
+            <% redirect_url = gateway_ccavenue_callback_url(@transaction, protocol: protocol) %>
           <% end %>
           <%
             merchant_id     = @payment_method.preferred_merchant_id
